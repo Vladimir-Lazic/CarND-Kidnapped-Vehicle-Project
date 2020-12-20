@@ -9,12 +9,14 @@
 #ifndef HELPER_FUNCTIONS_H_
 #define HELPER_FUNCTIONS_H_
 
-#include "map.h"
-#include <fstream>
 #include <math.h>
+
+#include <fstream>
 #include <sstream>
 #include <string>
 #include <vector>
+
+#include "map.h"
 
 // for portability of M_PI (Vis Studio, MinGW, etc.)
 #ifndef M_PI
@@ -25,27 +27,26 @@ const double M_PI = 3.14159265358979323846;
  * Struct representing one position/control measurement.
  */
 struct control_s {
-  double velocity; // Velocity [m/s]
-  double yawrate;  // Yaw rate [rad/s]
+  double velocity;  // Velocity [m/s]
+  double yawrate;   // Yaw rate [rad/s]
 };
 
 /**
  * Struct representing one ground truth position.
  */
 struct ground_truth {
-  double x;     // Global vehicle x position [m]
-  double y;     // Global vehicle y position
-  double theta; // Global vehicle yaw [rad]
+  double x;      // Global vehicle x position [m]
+  double y;      // Global vehicle y position
+  double theta;  // Global vehicle yaw [rad]
 };
 
 /**
  * Struct representing one landmark observation measurement.
  */
 struct LandmarkObs {
-
-  int id;   // Id of matching landmark in the map.
-  double x; // Local (vehicle coords) x position of landmark observation [m]
-  double y; // Local (vehicle coords) y position of landmark observation [m]
+  int id;    // Id of matching landmark in the map.
+  double x;  // Local (vehicle coords) x position of landmark observation [m]
+  double y;  // Local (vehicle coords) y position of landmark observation [m]
 };
 
 /**
@@ -95,7 +96,6 @@ inline bool read_map_data(std::string filename, Map &map) {
 
   // Run over each single line
   while (getline(in_file_map, line_map)) {
-
     std::istringstream iss_map(line_map);
 
     // Declare landmark values and ID
@@ -140,7 +140,6 @@ inline bool read_control_data(std::string filename,
 
   // Run over each single line:
   while (getline(in_file_pos, line_pos)) {
-
     std::istringstream iss_pos(line_pos);
 
     // Declare position values:
@@ -181,7 +180,6 @@ inline bool read_gt_data(std::string filename, std::vector<ground_truth> &gt) {
 
   // Run over each single line
   while (getline(in_file_pos, line_pos)) {
-
     std::istringstream iss_pos(line_pos);
 
     // Declare position values
@@ -225,7 +223,6 @@ inline bool read_landmark_data(std::string filename,
 
   // Run over each single line
   while (getline(in_file_obs, line_obs)) {
-
     std::istringstream iss_obs(line_obs);
 
     // Declare position values
@@ -248,4 +245,4 @@ inline bool read_landmark_data(std::string filename,
   return true;
 }
 
-#endif // HELPER_FUNCTIONS_H_
+#endif  // HELPER_FUNCTIONS_H_

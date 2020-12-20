@@ -9,9 +9,10 @@
 #ifndef PARTICLE_FILTER_H_
 #define PARTICLE_FILTER_H_
 
-#include "helper_functions.h"
 #include <string>
 #include <vector>
+
+#include "helper_functions.h"
 
 struct Particle {
   int id;
@@ -25,7 +26,7 @@ struct Particle {
 };
 
 class ParticleFilter {
-public:
+ public:
   // Constructor
   // @param num_particles Number of particles
   ParticleFilter() : num_particles(0), is_initialized(false) {}
@@ -108,7 +109,7 @@ public:
   // Set of current particles
   std::vector<Particle> particles;
 
-private:
+ private:
   // Number of particles to draw
   int num_particles;
 
@@ -119,4 +120,4 @@ private:
   std::vector<double> weights;
 };
 
-#endif // PARTICLE_FILTER_H_
+#endif  // PARTICLE_FILTER_H_
