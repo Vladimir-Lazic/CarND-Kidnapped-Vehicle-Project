@@ -24,6 +24,8 @@ using std::normal_distribution;
 using std::string;
 using std::vector;
 
+#define MIN_VALUE (0.0000001)
+
 #define assertm(exp, msg) assert(((void)msg, exp))
 
 void ParticleFilter::init(double x, double y, double theta, double std[]) {
@@ -31,24 +33,24 @@ void ParticleFilter::init(double x, double y, double theta, double std[]) {
 
   normal_distribution<double> dist_x(x, std[0]);
   normal_distribution<double> dist_y(y, std[1]);
-  normal_distribution<double> dist_theta(x, std[2]);
+  normal_distribution<double> dist_theta(theta, std[2]);
 
   std::default_random_engine gen;
 
-  for (int i = 0; i < num_particles; i++) {
-    Particle p;
+  /* Define particles as required and append them to particles list */
+  for (int i = 0; i < num_particles; ++i) {
+    Particle particle;
 
-    p.weight = 1.0;
+    particle.id = i;
+    particle.x = dist_x(gen);
+    particle.y = dist_y(gen);
+    particle.theta = dist_theta(gen);
+    particle.weight = 1.0;
 
-    p.x = dist_x(gen);
-    p.y = dist_y(gen);
-    p.theta = dist_theta(gen);
-    p.id = i;
-
-    particles.push_back(p);
-    weights.push_back(p.weight);
+    particles.push_back(particle);
+    weights.push_back(particle.weight);
   }
-
+  /* Set the flag indicating that particles have been initialized */
   is_initialized = true;
 }
 
@@ -60,36 +62,32 @@ void ParticleFilter::prediction(double delta_t, double std_pos[],
 
   std::default_random_engine gen;
 
+  double x;
+  double y;
+  double theta;
+
   for (int i = 0; i < num_particles; i++) {
-    double x_final = 0;
-    double y_final = 0;
-    double theta_final = 0;
+    double x = particles[i].x;
+    double y = particles[i].y;
+    double theta = particles[i].theta;
 
-    double x_initial = particles[i].x;
-    double y_initial = particles[i].y;
-    double theta_initial = particles[i].theta;
+    if (fabs(yaw_rate) > MIN_VALUE) {
+      x += (velocity / yaw_rate) *
+           (sin(theta + yaw_rate * delta_t) - sin(theta));
 
-    if (fabs(yaw_rate) > 0.0001) {
-      x_final = x_initial + (velocity / yaw_rate) *
-                                (sin(theta_initial + yaw_rate * delta_t) -
-                                 sin(theta_initial));
+      y += (velocity / yaw_rate) *
+           (cos(theta) - cos(theta + yaw_rate * delta_t));
 
-      y_final = y_initial + (velocity / yaw_rate) *
-                                (cos(theta_initial) -
-                                 cos(theta_initial + yaw_rate * delta_t));
-
-      theta_final = theta_initial + yaw_rate * delta_t;
+      theta += yaw_rate * delta_t;
     } else {
-      x_final = x_initial + velocity * delta_t * cos(theta_initial);
+      x += velocity * delta_t * cos(theta);
 
-      y_final = y_initial + velocity * delta_t * sin(theta_initial);
-
-      theta_final = theta_initial;
+      y += velocity * delta_t * sin(theta);
     }
 
-    particles[i].x = x_final + dist_x(gen);
-    particles[i].y = y_final + dist_y(gen);
-    particles[i].theta = theta_final + dist_theta(gen);
+    particles[i].x = x + dist_x(gen);
+    particles[i].y = y + dist_y(gen);
+    particles[i].theta = theta + dist_theta(gen);
   }
 }
 
@@ -207,17 +205,11 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
 
 void ParticleFilter::resample() {
   vector<Particle> new_particles;
-  vector<double> particle_weights;
-
-  for (int i = 0; i < weights.size(); i++) {
-    particle_weights.push_back(weights[i]);
-  }
 
   std::default_random_engine gen;
-  std::discrete_distribution<> dist_particles(particle_weights.begin(),
-                                              particle_weights.end());
+  std::discrete_distribution<> dist_particles(weights.begin(), weights.end());
 
-  int index = -1;
+  int index;
   for (int i = 0; i < num_particles; i++) {
     index = dist_particles(gen);
     new_particles.push_back(particles[index]);
